@@ -101,7 +101,7 @@ public class MCTSBot implements Bot{
 			
 			double avgScore = child.totalScore/child.simulations;
 			System.out.println("avgScore: " + avgScore);
-			if(avgScore > highestAvgScore) {
+			if(avgScore >= highestAvgScore) {
 				highestAvgScore = avgScore;
 				bestAction = child.agentMoves.get(0);
 			}
