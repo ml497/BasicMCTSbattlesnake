@@ -6,6 +6,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import mcts.MCTSNode;
 import snakegame.Collidable;
@@ -23,12 +25,15 @@ import snakegame.SnakeHead;
 // 6. Expand node if score threshold is met.
 // 7. Repeat from step 3.
 // 8. 
+
+//aka CRUSHMASTER 10000
 public class MCTSBot implements Bot{
 	
 	private RandomSurviveSnake opponentBot = new RandomSurviveSnake();
 	private List<MCTSNode> currentLeafNodes;
-	
 	private Move lastMove;
+	
+	private ExecutorService executorService = Executors.newFixedThreadPool(7);
 	
 	public Move move(SnakeHead me, Model model, long availableTime) {
 		long startTime = System.currentTimeMillis();
@@ -43,8 +48,8 @@ public class MCTSBot implements Bot{
 		this.currentLeafNodes = new ArrayList<MCTSNode>(root.children);
 		
 		while(System.currentTimeMillis() - startTime < availableTime) {
+			
 			runSimulationOnBestCandidate(model, me.x, me.y);
-			orderNodesUCB();
 		}
 		System.out.println("simulations achieved: " + root.simulations);
 		lastMove = this.determineBestMove(root);
@@ -75,21 +80,24 @@ public class MCTSBot implements Bot{
 		throw new Exception("No matching snake found!");
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void runSimulationOnBestCandidate(Model model, int meX, int meY) {
 		Model modelCopy = model.copyFromOrigin();
-//		System.out.println("headLoc: " + meX + ", " + meY);
 		SnakeHead meCopy = (SnakeHead) modelCopy.board[meX][meY];
-//		System.out.println(meCopy);
-		MCTSNode nodeToEvaluate = currentLeafNodes.get(0);
+		MCTSNode nodeToEvaluate = null;
+		synchronized(currentLeafNodes) {
+			nodeToEvaluate = currentLeafNodes.remove(0);
+		}	
 		nodeToEvaluate.runSimulation(modelCopy, meCopy, opponentBot);
-		if(nodeToEvaluate.children != null) {
-			currentLeafNodes.remove(nodeToEvaluate);
-			currentLeafNodes.addAll(nodeToEvaluate.children);
+		
+		synchronized(currentLeafNodes) {
+			if(nodeToEvaluate.children != null) {
+				currentLeafNodes.addAll(nodeToEvaluate.children);
+			} else {
+				currentLeafNodes.add(nodeToEvaluate);
+			}
+			Collections.sort(currentLeafNodes);
 		}
-	}
-	
-	private void orderNodesUCB() {
-		Collections.sort(currentLeafNodes);
 	}
 	
 	private Move determineBestMove(MCTSNode root) {
