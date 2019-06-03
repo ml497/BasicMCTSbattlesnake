@@ -29,11 +29,12 @@ public class MCTSNode implements Comparable{
 	public void runSimulation(Model gameState, SnakeHead me, Bot opponentBot) {
 		int startLocX = me.x;
 		int startLocY = me.y;
+		int foodEatenStart = me.foodEaten;
 		double snakesStart = gameState.heads.size();
 		advanceGameToNode(gameState, me, opponentBot);
 		runGame(gameState, me, opponentBot);
 //		double score = snakesBeatenBonus(snakesStart, gameState.heads.size());
-		double score = me.body.size();
+		double score = foodEatenStart < me.foodEaten ? 0 : 1;
 		if(isGameWon(gameState, me)) {
 			score += 100;
 		}

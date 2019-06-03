@@ -9,6 +9,7 @@ public class SnakeHead implements Collidable{
 	public int x;
 	public int y;
 	public int lifespan;
+	public int foodEaten = 0;
 	
 	public SnakeHead(int x, int y, int lifespan) {
 		this.x = x;
