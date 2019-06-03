@@ -34,7 +34,7 @@ public class MCTSNode implements Comparable{
 		advanceGameToNode(gameState, me, opponentBot);
 		runGame(gameState, me, opponentBot);
 //		double score = snakesBeatenBonus(snakesStart, gameState.heads.size());
-		double score = foodEatenStart < me.foodEaten ? 0 : 1;
+		double score = foodEatenStart < me.foodEaten ? 0 : 50;
 		if(isGameWon(gameState, me)) {
 			score += 100;
 		}
