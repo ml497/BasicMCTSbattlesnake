@@ -48,7 +48,8 @@ public class Main{
         }
         
         LatencyCheckerThread latencyChecker = new LatencyCheckerThread();
-        latencyChecker.run();
+        Thread thread = new Thread(latencyChecker);
+        thread.start();
         
         port(Integer.parseInt(port));
         get("/", (req, res) -> "Battlesnake documentation can be found at " + 
