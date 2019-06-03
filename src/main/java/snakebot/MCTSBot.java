@@ -33,7 +33,7 @@ import snakegame.SnakeHead;
 public class MCTSBot implements Bot{
 	
 	private static int ALLOWED_TIME = 200;
-	private static int MAX_THREADS = 2;
+	private static int MAX_THREADS = 7;
 	private RandomSurviveSnake opponentBot = new RandomSurviveSnake();
 	private List<MCTSNode> currentLeafNodes;
 	private Set<MCTSNode> busyNodes;
