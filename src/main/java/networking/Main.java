@@ -46,6 +46,10 @@ public class Main{
             LOG.info("Using default port: {}", port);
             port = "8080";
         }
+        
+        LatencyCheckerThread latencyChecker = new LatencyCheckerThread();
+        latencyChecker.run();
+        
         port(Integer.parseInt(port));
         get("/", (req, res) -> "Battlesnake documentation can be found at " + 
             "<a href=\"https://docs.battlesnake.io\">https://docs.battlesnake.io</a>.");
@@ -74,6 +78,7 @@ public class Main{
          * @return
          */
         public Map<String, String> process(Request req, Response res) {
+        	LatencySingleton.setIP(req.ip());
             try {
                 JsonNode parsedRequest = JSON_MAPPER.readTree(req.body());
                 String uri = req.uri();

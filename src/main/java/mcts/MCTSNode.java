@@ -33,9 +33,10 @@ public class MCTSNode implements Comparable{
 		advanceGameToNode(gameState, me, opponentBot);
 		runGame(gameState, me, opponentBot);
 		double score = snakesBeatenBonus(snakesStart, gameState.heads.size());
-//		if(isGameWon(gameState, me)) {
-//			score += 100;
-//		}
+		score = 0;
+		if(isGameWon(gameState, me)) {
+			score = 100;
+		}
 		totalScore += score;
 		simulations++;
 		parent.propagateScore(score);
@@ -104,6 +105,9 @@ public class MCTSNode implements Comparable{
 	}
 	
 	private double snakesBeatenBonus(double snakesStart, double snakesNow) {
+		if(snakesStart == 0) {
+			return 0;
+		}
 		return 100 * (snakesStart - snakesNow) / snakesStart;
 	}
 	
@@ -116,10 +120,8 @@ public class MCTSNode implements Comparable{
 		double ucbDelta = ((MCTSNode) other).getUCB() - this.getUCB();
 		if(ucbDelta < 0){
 			return -1;
-		} else if(ucbDelta > 0) {
-			return 1;
 		} else {
-			return 0;
+			return 1;
 		}
 	}
 	

@@ -4,12 +4,15 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import mcts.MCTSNode;
+import networking.LatencySingleton;
 import snakegame.Collidable;
 import snakegame.CollidableType;
 import snakegame.Model;
@@ -29,11 +32,14 @@ import snakegame.SnakeHead;
 //aka CRUSHMASTER 10000
 public class MCTSBot implements Bot{
 	
+	private static int ALLOWED_TIME = 200;
+	private static int MAX_THREADS = 2;
 	private RandomSurviveSnake opponentBot = new RandomSurviveSnake();
 	private List<MCTSNode> currentLeafNodes;
+	private Set<MCTSNode> busyNodes;
 	private Move lastMove;
 	
-	private ExecutorService executorService = Executors.newFixedThreadPool(7);
+	private ExecutorService executorService = Executors.newFixedThreadPool(MAX_THREADS);
 	
 	public Move move(SnakeHead me, Model model, long availableTime) {
 		long startTime = System.currentTimeMillis();
@@ -46,10 +52,21 @@ public class MCTSBot implements Bot{
 			root.expand(new Point(me.x, me.y), lastMove);
 		}
 		this.currentLeafNodes = new ArrayList<MCTSNode>(root.children);
+		this.busyNodes = new HashSet<MCTSNode>();
 		
-		while(System.currentTimeMillis() - startTime < availableTime) {
-			
-			runSimulationOnBestCandidate(model, me.x, me.y);
+		for(int i=0; i<MAX_THREADS; i++) {
+			this.executorService.submit(() -> {
+				while((System.currentTimeMillis() - startTime) < availableTime) {
+					runSimulationOnBestCandidate(model, me.x, me.y);
+				}
+			});
+		}
+		try {
+			long timeToSleep = availableTime - (System.currentTimeMillis() - startTime);
+			Thread.sleep(timeToSleep);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		System.out.println("simulations achieved: " + root.simulations);
 		lastMove = this.determineBestMove(root);
@@ -57,7 +74,7 @@ public class MCTSBot implements Bot{
 	}
 	
 	public Move move(SnakeHead me, Model model) {
-		return move(me, model, 100);
+		return move(me, model, ALLOWED_TIME - LatencySingleton.getLatency());
 	}
 	
 	private Move getLastMove(SnakeHead toCheck, Model game) throws Exception {
@@ -86,16 +103,26 @@ public class MCTSBot implements Bot{
 		SnakeHead meCopy = (SnakeHead) modelCopy.board[meX][meY];
 		MCTSNode nodeToEvaluate = null;
 		synchronized(currentLeafNodes) {
-			nodeToEvaluate = currentLeafNodes.remove(0);
+			for(int i=0; i<MAX_THREADS ; i++) {
+				if(!busyNodes.contains(currentLeafNodes.get(i))) {
+					nodeToEvaluate = currentLeafNodes.get(i);
+					busyNodes.add(nodeToEvaluate);
+					break;
+				} else {
+				}
+			}
 		}	
+		if(nodeToEvaluate == null ) {
+			return;
+		}
 		nodeToEvaluate.runSimulation(modelCopy, meCopy, opponentBot);
 		
 		synchronized(currentLeafNodes) {
 			if(nodeToEvaluate.children != null) {
 				currentLeafNodes.addAll(nodeToEvaluate.children);
-			} else {
-				currentLeafNodes.add(nodeToEvaluate);
-			}
+				currentLeafNodes.remove(nodeToEvaluate);
+			} 
+			busyNodes.remove(nodeToEvaluate);
 			Collections.sort(currentLeafNodes);
 		}
 	}
