@@ -36,6 +36,16 @@ public class MonteCarloBot implements Bot{
 		return headResultsCache.get(meHash).generateRandomWeightedMove();
 	}
 	
+	public void printLikelihoods() {
+		for(HashPoint key : headResultsCache.keySet()) {
+			System.out.println("Head at: " + key.x + ", " + key.y );
+			System.out.println("LEFT: " + headResultsCache.get(key).results.get(Move.LEFT));
+			System.out.println("UP: " + headResultsCache.get(key).results.get(Move.UP));
+			System.out.println("RIGHT: " + headResultsCache.get(key).results.get(Move.RIGHT));
+			System.out.println("DOWN: " + headResultsCache.get(key).results.get(Move.DOWN));
+		}
+	}
+	
 	public void runSimulations(Model gameState) {
 		for (SnakeHead head : gameState.heads ) {
 			List<Move> availableMoves = SnakeAgentUtils.getAvailableMoves(head, gameState.board);

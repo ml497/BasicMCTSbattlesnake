@@ -60,6 +60,7 @@ public class MCTSBot implements Bot{
 			while((System.currentTimeMillis() - startTime) < availableTime) {
 				opponentFirstMoveBot.runSimulations(model);
 			}
+			opponentFirstMoveBot.printLikelihoods();
 		});
 		
 		for(int i=0; i<MAX_THREADS-1; i++) {

@@ -11,7 +11,7 @@ public class MCResult {
 	private Random rand = new Random();
 	public double totalScore = 0;
 	public int totalResults = 0;
-	Map<Move, Double> results = new HashMap<Move, Double>();
+	public Map<Move, Double> results = new HashMap<Move, Double>();
 
 	public MCResult() {
 		results.put(Move.UP, 0d);
