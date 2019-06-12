@@ -44,9 +44,11 @@ public class MonteCarloBot implements Bot{
 			for(Move move : availableMoves) {
 				Model gameCopy = gameState.copyFromOrigin();
 				SnakeHead meCopy = (SnakeHead) gameCopy.board[head.x][head.y];
-				double score = 0;
+				int foodEatenStart = meCopy.foodEaten;
+				double snakesStart = gameCopy.heads.size();
 				advanceGameWithMove(gameCopy, meCopy, move);
 				runGame(gameCopy, meCopy, opponentBot);
+				double score = meCopy.foodEaten > foodEatenStart ? (80 / snakesStart) : 0;
 				if(isGameWon(gameCopy, meCopy)) {
 					score += 100;
 				}
