@@ -34,7 +34,7 @@ public class MCTSBot implements Bot{
 	
 	private static int ALLOWED_TIME = 200;
 	private static int MAX_THREADS = 7;
-	private Bot opponentFirstMoveBot;
+	private MonteCarloBot opponentFirstMoveBot;
 	private RandomSurviveSnake opponentBot = new RandomSurviveSnake();
 	private List<MCTSNode> currentLeafNodes;
 	private Set<MCTSNode> busyNodes;
@@ -45,7 +45,7 @@ public class MCTSBot implements Bot{
 	public Move move(SnakeHead me, Model model, long availableTime) {
 		long startTime = System.currentTimeMillis();
 		
-		opponentFirstMoveBot = new MonteCarloBot();
+		opponentFirstMoveBot = new MonteCarloBot(model);
 		MCTSNode root = new MCTSNode(null, new ArrayList<Move>());
 		
 		try {
@@ -56,7 +56,13 @@ public class MCTSBot implements Bot{
 		this.currentLeafNodes = new ArrayList<MCTSNode>(root.children);
 		this.busyNodes = new HashSet<MCTSNode>();
 		
-		for(int i=0; i<MAX_THREADS; i++) {
+		this.executorService.submit(() -> {
+			while((System.currentTimeMillis() - startTime) < availableTime) {
+				opponentFirstMoveBot.runSimulations(model);
+			}
+		});
+		
+		for(int i=0; i<MAX_THREADS-1; i++) {
 			this.executorService.submit(() -> {
 				while((System.currentTimeMillis() - startTime) < availableTime) {
 					runSimulationOnBestCandidate(model, me.x, me.y);

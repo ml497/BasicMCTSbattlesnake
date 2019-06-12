@@ -10,6 +10,7 @@ public class MCResult {
 
 	private Random rand = new Random();
 	double totalScore = 0;
+	public int totalResults = 0;
 	Map<Move, Double> results = new HashMap<Move, Double>();
 
 	public MCResult() {
@@ -22,6 +23,7 @@ public class MCResult {
 	public void addNewResult(Move actionTaken, double score) {
 		results.put(actionTaken, results.get(actionTaken) + score);
 		totalScore += score;
+		totalResults++;
 	}
 
 	public Move generateRandomWeightedMove() {
