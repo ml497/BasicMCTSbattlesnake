@@ -29,7 +29,7 @@ public class MonteCarloBot implements Bot{
 //		System.out.println("getting move for: " + me.x + ", " + me.y);
 		HashPoint meHash = new HashPoint(me.x, me.y);
 		
-		if(headResultsCache.get(meHash).totalResults < 20) {
+		if(headResultsCache.get(meHash).totalResults < 20 || headResultsCache.get(meHash).totalScore == 0) {
 			return null;
 		}
 		

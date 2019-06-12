@@ -9,7 +9,7 @@ import snakegame.Move;
 public class MCResult {
 
 	private Random rand = new Random();
-	double totalScore = 0;
+	public double totalScore = 0;
 	public int totalResults = 0;
 	Map<Move, Double> results = new HashMap<Move, Double>();
 
