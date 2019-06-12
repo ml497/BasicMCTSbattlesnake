@@ -27,16 +27,23 @@ public class MCResult {
 	}
 
 	public Move generateRandomWeightedMove() {
+		
+		double up = Math.pow(results.get(Move.UP), 2);
+		double right = Math.pow(results.get(Move.RIGHT), 2);
+		double down = Math.pow(results.get(Move.DOWN), 2);
+		double left = Math.pow(results.get(Move.LEFT), 2);
+		double total = up + right + down + left;
+		
 		double ran = rand.nextDouble();
-		ran -= results.get(Move.UP) / totalScore;
+		ran -= up / total;
 		if(ran <= 0) {
 			return Move.UP;
 		}
-		ran -= results.get(Move.RIGHT) / totalScore;
+		ran -= right / total;
 		if(ran <= 0) {
 			return Move.RIGHT;
 		}
-		ran -= results.get(Move.DOWN) / totalScore;
+		ran -= down / total;
 		if(ran <= 0) {
 			return Move.DOWN;
 		}
