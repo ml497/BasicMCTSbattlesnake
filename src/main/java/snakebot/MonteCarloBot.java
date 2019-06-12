@@ -46,8 +46,8 @@ public class MonteCarloBot implements Bot{
 				SnakeHead meCopy = (SnakeHead) gameCopy.board[head.x][head.y];
 				double score = 0;
 				advanceGameWithMove(gameCopy, meCopy, move);
-				runGame(gameCopy, head, opponentBot);
-				if(isGameWon(gameCopy, head)) {
+				runGame(gameCopy, meCopy, opponentBot);
+				if(isGameWon(gameCopy, meCopy)) {
 					score += 100;
 				}
 				headResultsCache.get(headStartLoc).addNewResult(move, score);
