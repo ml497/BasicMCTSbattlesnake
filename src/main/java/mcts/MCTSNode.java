@@ -31,12 +31,14 @@ public class MCTSNode implements Comparable {
 		int startLocY = me.y;
 		int foodEatenStart = me.foodEaten;
 		double snakesStart = gameState.heads.size();
-		advanceGameToNode(gameState, me, opponentBot, opponentFirstMoveBot);
+		boolean finishedFirstTurn = advanceGameToNode(gameState, me, opponentBot, opponentFirstMoveBot);
 		runGame(gameState, me, opponentBot);
 //		double score = snakesBeatenBonus(snakesStart, gameState.heads.size());
 		double score = me.foodEaten > foodEatenStart ? (80 / snakesStart) : 0;
 		if (isGameWon(gameState, me)) {
 			score += 100;
+		} else if (finishedFirstTurn) {
+			score = 0;
 		}
 		totalScore += score;
 		simulations++;
@@ -85,7 +87,7 @@ public class MCTSNode implements Comparable {
 		}
 	}
 
-	private void advanceGameToNode(Model gameState, SnakeHead me, Bot opponentBot, Bot opponentFirstMoveBot) {
+	private boolean advanceGameToNode(Model gameState, SnakeHead me, Bot opponentBot, Bot opponentFirstMoveBot) {
 		boolean isFirstMove = true;
 		for (Move move : this.agentMoves) {
 			List<Move> snakeMovesThisTick = new ArrayList<Move>();
@@ -106,11 +108,12 @@ public class MCTSNode implements Comparable {
 			}
 			gameState.tickGame(snakeMovesThisTick);
 
-			isFirstMove = false;
 			if (isGameOver(gameState, me)) {
 				break;
 			}
+			isFirstMove = false;
 		}
+		return isFirstMove;
 	}
 
 	private boolean isGameOver(Model gameState, SnakeHead me) {
