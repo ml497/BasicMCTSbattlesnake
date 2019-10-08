@@ -29,9 +29,12 @@ public class MCTSNode implements Comparable{
 	public void runSimulation(Model gameState, SnakeHead me, Bot opponentBot) {
 		int startLocX = me.x;
 		int startLocY = me.y;
-		double score = advanceGameToNode(gameState, me, opponentBot);
-		score += runGame(gameState, me, opponentBot);
-		score = 0; // comment to focus on surv
+		int foodEatenStart = me.foodEaten;
+		double snakesStart = gameState.heads.size();
+		advanceGameToNode(gameState, me, opponentBot);
+		runGame(gameState, me, opponentBot);
+//		double score = snakesBeatenBonus(snakesStart, gameState.heads.size());
+		double score = me.foodEaten > foodEatenStart ? (80/snakesStart) : 0;
 		if(isGameWon(gameState, me)) {
 			score += 100;
 		}
@@ -70,22 +73,17 @@ public class MCTSNode implements Comparable{
 		}
 	}
 	
-	private int runGame(Model gameState, SnakeHead me, Bot simulationBot) {
-		int movesExecuted = 0;
+	private void runGame(Model gameState, SnakeHead me, Bot simulationBot) {
 		while(!isGameOver(gameState, me)) {
 			List<Move> moves = new ArrayList<Move>();
 			for(SnakeHead head : gameState.heads) {
 				moves.add(simulationBot.move(head, gameState));
 			}
 			gameState.tickGame(moves);
-			movesExecuted++;
 		}
-		return movesExecuted;
 	}
 	
-	private int advanceGameToNode(Model gameState, SnakeHead me, Bot opponentBot) {
-		int movesExecuted = 0;
-			
+	private void advanceGameToNode(Model gameState, SnakeHead me, Bot opponentBot) {
 		for (Move move : this.agentMoves) {
 			List<Move> snakeMovesThisTick = new ArrayList<Move>();
 			for(SnakeHead snake : gameState.heads) {
@@ -99,15 +97,19 @@ public class MCTSNode implements Comparable{
 			
 			if(isGameOver(gameState, me)) {
 				break;
-			} else {
-				movesExecuted++;
-			}
+			} 
 		}
-		return movesExecuted;
 	}
 	
 	private boolean isGameOver(Model gameState, SnakeHead me) {
 		return !gameState.heads.contains(me) || gameState.heads.size() < 2;
+	}
+	
+	private double snakesBeatenBonus(double snakesStart, double snakesNow) {
+		if(snakesStart == 0) {
+			return 0;
+		}
+		return 100 * (snakesStart - snakesNow) / snakesStart;
 	}
 	
 	private boolean isGameWon(Model gameState, SnakeHead me) {
@@ -116,7 +118,8 @@ public class MCTSNode implements Comparable{
 
 	@Override
 	public int compareTo(Object other) {
-		if(((MCTSNode) other).getUCB() - this.getUCB() < 0){
+		double ucbDelta = ((MCTSNode) other).getUCB() - this.getUCB();
+		if(ucbDelta < 0){
 			return -1;
 		} else {
 			return 1;

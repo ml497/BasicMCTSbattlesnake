@@ -174,6 +174,7 @@ public class Model{
 
 		eaterHead.incrementBodyLifeSpans();
 		eaterHead.maxSnakeLifeSpan();
+		eaterHead.foodEaten++;
 		board[eaterHead.x][eaterHead.y] = eaterHead;
 		generateNewFood();
 	}
